@@ -474,14 +474,12 @@ faq = {
 }
 
 
-# =========================================================
-# TRANSFORMERS MODEL
-# =========================================================
 
-print("\n==========================================")
+
+
 print("Loading Transformer AI model...")
 print("First run may take some time.")
-print("==========================================\n")
+
 
 try:
 
@@ -504,9 +502,7 @@ except Exception as error:
     print("Error:", error)
 
 
-# =========================================================
-# FAQ SEARCH
-# =========================================================
+
 
 def find_faq_response(message):
 
@@ -549,9 +545,9 @@ def find_faq_response(message):
     return None
 
 
-# =========================================================
+
 # TRANSFORMER RESPONSE
-# =========================================================
+
 
 def generate_ai_response(message):
 
@@ -675,9 +671,8 @@ def chatbot_response(message):
     return bot_response
 
 
-# =========================================================
 # HOME PAGE
-# =========================================================
+
 
 @app.route("/")
 def home():
@@ -685,9 +680,9 @@ def home():
     return render_template("index.html")
 
 
-# =========================================================
+
 # CHAT API
-# =========================================================
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -738,9 +733,8 @@ def chat():
         }), 500
 
 
-# =========================================================
 # CLEAR CONVERSATION
-# =========================================================
+
 
 @app.route("/clear", methods=["POST"])
 def clear_conversation():
@@ -754,25 +748,25 @@ def clear_conversation():
     })
 
 
-# =========================================================
+
 # RUN APPLICATION
-# =========================================================
+
 
 if __name__ == "__main__":
 
     # Create database
     create_database()
 
-    print("\n==========================================")
+
     print("AI-POWERED CHATBOT")
-    print("==========================================")
+
     print("NLP: NLTK")
     print("AI: Transformers")
     print("Framework: Flask")
     print("Database: SQLite")
-    print("==========================================")
+   
     print("Open: http://127.0.0.1:5000")
-    print("==========================================\n")
+   
 
     app.run(
         host="127.0.0.1",
