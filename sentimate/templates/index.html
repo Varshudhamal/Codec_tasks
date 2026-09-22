@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI-Based Sentiment Analyzer</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+
+    <style>
+
+        /* 
+           BASIC RESET
+         */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        /* 
+           BODY
+         */
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+
+            background: linear-gradient(
+                135deg,
+                #667eea,
+                #764ba2
+            );
+
+            color: #222;
+
+            min-height: 100vh;
+
+            padding: 35px 15px;
+        }
+
+
+        /* 
+           PAGE
+         */
+
+        .page {
+            width: 100%;
+
+            max-width: 1050px;
+
+            margin: auto;
+        }
+
+
+        /* 
+           MAIN CARD
+        */
+
+        .main-card {
+            background: white;
+
+            border-radius: 15px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.20);
+        }
+
+
+        /* 
+           HEADER
+         */
+
+        .header {
+            text-align: center;
+
+            margin-bottom: 20px;
+        }
+
+
+        .ai-icon {
+            width: 55px;
+            height: 55px;
+
+            margin: 0 auto 12px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: linear-gradient(
+                135deg,
+                #667eea,
+                #764ba2
+            );
+
+            color: white;
+
+            font-size: 18px;
+
+            font-weight: bold;
+        }
+
+
+        .header h1 {
+            font-size: 27px;
+
+            color: #172554;
+
+            margin-bottom: 6px;
+        }
+
+
+        .header p {
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+
+        /* 
+           MONGODB STATUS
+         */
+
+        .status {
+            text-align: center;
+
+            padding: 10px;
+
+            border-radius: 6px;
+
+            margin-bottom: 18px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+        }
+
+
+        .connected {
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+
+        .not-connected {
+            background: #fee2e2;
+
+            color: #b91c1c;
+        }
+
+
+        /* 
+           ALERT
+        */
+
+        .alert {
+            padding: 10px;
+
+            border-radius: 6px;
+
+            text-align: center;
+
+            font-size: 12px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .success {
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+
+        .error {
+            background: #fee2e2;
+
+            color: #b91c1c;
+        }
+
+
+        /* 
+           INPUT SECTION
+         */
+
+        .section {
+            margin-bottom: 22px;
+        }
+
+
+        .section-title {
+            font-size: 15px;
+
+            color: #172554;
+
+            margin-bottom: 9px;
+        }
+
+
+        textarea {
+            width: 100%;
+
+            min-height: 150px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 7px;
+
+            padding: 13px;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            font-size: 14px;
+
+            resize: vertical;
+
+            outline: none;
+        }
+
+
+        textarea:focus {
+            border-color: #667eea;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(102, 126, 234, 0.12);
+        }
+
+
+        .counter {
+            text-align: right;
+
+            color: #94a3b8;
+
+            font-size: 11px;
+
+            margin-top: 5px;
+        }
+
+
+        /* 
+           BUTTON
+         */
+
+        .button-area {
+            text-align: center;
+
+            margin-top: 12px;
+        }
+
+
+        .analyze-btn {
+            border: none;
+
+            background: linear-gradient(
+                135deg,
+                #667eea,
+                #764ba2
+            );
+
+            color: white;
+
+            padding: 11px 25px;
+
+            border-radius: 6px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 5px 15px
+                rgba(102, 126, 234, 0.35);
+        }
+
+
+        /* 
+           ANALYSIS RESULT
+         */
+
+        .result-box {
+            border: 1px solid #dbe4ff;
+
+            background: #f8f9ff;
+
+            border-radius: 8px;
+
+            padding: 20px;
+
+            text-align: center;
+
+            margin-top: 18px;
+        }
+
+
+        .result-box h2 {
+            font-size: 17px;
+
+            color: #172554;
+
+            margin-bottom: 13px;
+        }
+
+
+        .sentiment {
+            display: inline-block;
+
+            padding: 8px 22px;
+
+            border-radius: 20px;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            margin-bottom: 10px;
+        }
+
+
+        .positive {
+            background: #d1fae5;
+
+            color: #047857;
+        }
+
+
+        .negative {
+            background: #fee2e2;
+
+            color: #dc2626;
+        }
+
+
+        .neutral {
+            background: #fef3c7;
+
+            color: #b45309;
+        }
+
+
+        .confidence {
+            font-size: 12px;
+
+            color: #475569;
+        }
+
+
+        .confidence strong {
+            color: #667eea;
+        }
+
+
+        .analyzed-text {
+            background: white;
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            margin-top: 12px;
+
+            text-align: left;
+
+            font-size: 12px;
+
+            color: #475569;
+
+            line-height: 1.5;
+        }
+
+
+        .mongo-message {
+            text-align: center;
+
+            color: #b45309;
+
+            font-size: 10px;
+
+            margin-top: 8px;
+        }
+
+
+        /* 
+           VISUALIZED REPORT
+         */
+
+        .report-section {
+            margin-top: 30px;
+
+            padding-top: 25px;
+
+            border-top: 1px solid #e2e8f0;
+        }
+
+
+        .report-title {
+            text-align: center;
+
+            font-size: 22px;
+
+            color: #172554;
+
+            margin-bottom: 5px;
+        }
+
+
+        .report-subtitle {
+            text-align: center;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            margin-bottom: 22px;
+        }
+
+
+        /* 
+           STATISTICS
+         */
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 12px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .stat {
+            background: #f8fafc;
+
+            border: 1px solid #dbe2ea;
+
+            border-radius: 8px;
+
+            padding: 16px;
+
+            text-align: center;
+        }
+
+
+        .stat span {
+            display: block;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .stat strong {
+            font-size: 27px;
+
+            color: #172554;
+        }
+
+
+        .green {
+            color: #16a34a !important;
+        }
+
+
+        .red {
+            color: #dc2626 !important;
+        }
+
+
+        .orange {
+            color: #d97706 !important;
+        }
+
+
+        /* 
+           CHARTS
+         */
+
+        .charts {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 20px;
+        }
+
+
+        .chart-card {
+            background: white;
+
+            border: 1px solid #dbe2ea;
+
+            border-radius: 10px;
+
+            padding: 20px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, 0.04);
+        }
+
+
+        .chart-card h3 {
+            text-align: center;
+
+            color: #172554;
+
+            font-size: 17px;
+
+            margin-bottom: 15px;
+        }
+
+
+
+        .chart-box {
+            position: relative;
+
+            width: 100%;
+
+            height: 350px;
+        }
+
+
+        .chart-box canvas {
+            width: 100% !important;
+
+            height: 100% !important;
+        }
+
+
+        /* 
+           RECENT REVIEWS
+        */
+
+        .reviews {
+            margin-top: 20px;
+
+            border: 1px solid #dbe2ea;
+
+            border-radius: 10px;
+
+            padding: 20px;
+        }
+
+
+        .reviews h3 {
+            color: #172554;
+
+            font-size: 17px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .review {
+            padding: 12px 0;
+
+            border-bottom:
+                1px solid #e2e8f0;
+        }
+
+
+        .review:last-child {
+            border-bottom: none;
+        }
+
+
+        .review-text {
+            color: #475569;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            margin-bottom: 8px;
+        }
+
+
+        .review-label {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 5px;
+
+            font-size: 11px;
+
+            font-weight: bold;
+        }
+
+
+        .review-score {
+            margin-left: 10px;
+
+            color: #64748b;
+
+            font-size: 11px;
+        }
+
+
+        .no-data {
+            color: #64748b;
+
+            text-align: center;
+
+            padding: 15px;
+
+            font-size: 13px;
+        }
+
+
+        /* 
+          FOOTER
+        */
+
+        footer {
+            text-align: center;
+
+            color: white;
+
+            font-size: 10px;
+
+            margin-top: 15px;
+        }
+
+
+        /* 
+          RESPONSIVE
+        */
+
+        @media (max-width: 750px) {
+
+            .charts {
+                grid-template-columns: 1fr;
+            }
+
+
+            .stats {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+
+            .chart-box {
+                height: 330px;
+            }
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            body {
+                padding: 15px 8px;
+            }
+
+
+            .main-card {
+                padding: 18px;
+            }
+
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+
+            .chart-box {
+                height: 300px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- 
+         MAIN CARD
+    -->
+
+    <div class="main-card">
+
+
+        <!-- 
+             HEADER
+         -->
+
+        <div class="header">
+
+            <div class="ai-icon">
+                AI
+            </div>
+
+
+            <h1>
+                AI-Based Sentiment Analyzer
+            </h1>
+
+
+            <p>
+                Analyze product reviews and social media text using Artificial Intelligence
+            </p>
+
+        </div>
+
+
+        <!-- 
+             MONGODB STATUS
+         -->
+
+        {% if mongodb_connected %}
+
+        <div class="status connected">
+            MongoDB Connected Successfully
+        </div>
+
+        {% else %}
+
+        <div class="status not-connected">
+            MongoDB is not connected. Please start MongoDB.
+        </div>
+
+        {% endif %}
+
+
+        <!-- 
+             SUCCESS MESSAGE
+         -->
+
+        {% if success %}
+
+        <div class="alert success">
+            {{ success }}
+        </div>
+
+        {% endif %}
+
+
+        <!-- 
+             ERROR MESSAGE
+         -->
+
+        {% if error %}
+
+        <div class="alert error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <!-- 
+             ENTER REVIEW
+        -->
+
+        <div class="section">
+
+            <div class="section-title">
+                <strong>Enter Your Review</strong>
+            </div>
+
+
+            <form method="POST">
+
+                <textarea
+                    id="text"
+                    name="text"
+                    maxlength="5000"
+                    placeholder="Example: This product is very good and I really like it."
+                    required>{{ text }}</textarea>
+
+
+                <div class="counter">
+
+                    <span id="charCount">0</span>
+                    / 5000 characters
+
+                </div>
+
+
+                <div class="button-area">
+
+                    <button
+                        type="submit"
+                        class="analyze-btn">
+
+                        Analyze Sentiment
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- 
+             ANALYSIS RESULT
+         -->
+
+        {% if sentiment %}
+
+        <div class="result-box">
+
+            <h2>
+                Analysis Result
+            </h2>
+
+
+            <div class="sentiment
+                {% if sentiment == 'Positive' %}
+                    positive
+                {% elif sentiment == 'Negative' %}
+                    negative
+                {% else %}
+                    neutral
+                {% endif %}
+            ">
+
+                {{ sentiment }}
+
+            </div>
+
+
+            <div class="confidence">
+
+                Confidence Score:
+
+                <strong>
+                    {{ score }}%
+                </strong>
+
+            </div>
+
+
+            <div class="analyzed-text">
+
+                <strong>
+                    Analyzed Text:
+                </strong>
+
+                <br>
+
+                {{ text }}
+
+            </div>
+
+        </div>
+
+
+        {% if not mongodb_connected %}
+
+        <div class="mongo-message">
+            • MongoDB Not Connected
+        </div>
+
+        {% endif %}
+
+        {% endif %}
+
+
+        <!-- 
+             VISUALIZED SENTIMENT REPORT
+         -->
+
+        <div class="report-section">
+
+
+            <h2 class="report-title">
+                Visualized Sentiment Report
+            </h2>
+
+
+            <p class="report-subtitle">
+                Sentiment analysis results
+            </p>
+
+
+            <!-- 
+                 STATISTICS
+             -->
+
+            <div class="stats">
+
+
+                <div class="stat">
+
+                    <span>
+                        Total Reviews
+                    </span>
+
+                    <strong>
+                        {{ total_count }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Positive
+                    </span>
+
+                    <strong class="green">
+                        {{ positive_count }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Negative
+                    </span>
+
+                    <strong class="red">
+                        {{ negative_count }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Neutral
+                    </span>
+
+                    <strong class="orange">
+                        {{ neutral_count }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- 
+                 CHARTS
+             -->
+
+            <div class="charts">
+
+
+                <!-- BAR CHART -->
+
+                <div class="chart-card">
+
+                    <h3>
+                        Sentiment Count
+                    </h3>
+
+
+                    <div class="chart-box">
+
+                        <canvas
+                            id="barChart">
+                        </canvas>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DOUGHNUT CHART -->
+
+                <div class="chart-card">
+
+                    <h3>
+                        Sentiment Distribution
+                    </h3>
+
+
+                    <div class="chart-box">
+
+                        <canvas
+                            id="doughnutChart">
+                        </canvas>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- 
+                 RECENT REVIEWS
+             -->
+
+            <div class="reviews">
+
+                <h3>
+                    Recent Reviews
+                </h3>
+
+
+                {% if recent_reviews %}
+
+
+                    {% for review in recent_reviews %}
+
+
+                    <div class="review">
+
+
+                        <div class="review-text">
+
+                            {{ review.text }}
+
+                        </div>
+
+
+                        <div>
+
+
+                            <span
+                                class="review-label
+                                {% if review.sentiment == 'Positive' %}
+                                    positive
+                                {% elif review.sentiment == 'Negative' %}
+                                    negative
+                                {% else %}
+                                    neutral
+                                {% endif %}
+                            ">
+
+                                {{ review.sentiment }}
+
+                            </span>
+
+
+                            <span class="review-score">
+
+                                Confidence:
+                                {{ review.score }}%
+
+                            </span>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <div class="no-data">
+
+                        No reviews available yet.
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!--
+         FOOTER
+     -->
+
+    <footer>
+
+        AI Sentiment Analyzer |
+        Flask + Hugging Face Transformers + MongoDB
+
+    </footer>
+
+
+</div>
+
+
+
+<!-- 
+     JAVASCRIPT
+-->
+
+<script>
+
+
+/* 
+   CHARACTER COUNTER
+ */
+
+const textArea =
+    document.getElementById("text");
+
+const charCount =
+    document.getElementById("charCount");
+
+
+function updateCounter() {
+
+    if (textArea && charCount) {
+
+        charCount.textContent =
+            textArea.value.length;
+
+    }
+
+}
+
+
+if (textArea) {
+
+    textArea.addEventListener(
+        "input",
+        updateCounter
+    );
+
+    updateCounter();
+
+}
+
+
+/* 
+   GET DATA FROM FLASK
+ */
+
+const positiveCount =
+    Number("{{ positive_count }}") || 0;
+
+
+const negativeCount =
+    Number("{{ negative_count }}") || 0;
+
+
+const neutralCount =
+    Number("{{ neutral_count }}") || 0;
+
+
+const totalCount =
+    positiveCount +
+    negativeCount +
+    neutralCount;
+
+
+/* 
+   BAR CHART */
+
+const barCanvas =
+    document.getElementById("barChart");
+
+
+if (barCanvas) {
+
+    new Chart(
+        barCanvas,
+        {
+
+            type: "bar",
+
+
+            data: {
+
+                labels: [
+                    "Positive",
+                    "Negative",
+                    "Neutral"
+                ],
+
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Number of Reviews",
+
+
+                        data: [
+
+                            positiveCount,
+                            negativeCount,
+                            neutralCount
+
+                        ],
+
+
+                        backgroundColor: [
+
+                            "#22c55e",
+                            "#ef4444",
+                            "#f59e0b"
+
+                        ],
+
+
+                        borderColor: [
+
+                            "#15803d",
+                            "#b91c1c",
+                            "#b45309"
+
+                        ],
+
+
+                        borderWidth: 1,
+
+
+                        borderRadius: 7,
+
+
+                        barThickness: 60
+
+                    }
+
+                ]
+
+            },
+
+
+            options: {
+
+                responsive: true,
+
+
+                maintainAspectRatio: false,
+
+
+                animation: {
+
+                    duration: 1000
+
+                },
+
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    },
+
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function(context) {
+
+                                    return (
+                                        " Reviews: " +
+                                        context.raw
+                                    );
+
+                                }
+
+                        }
+
+                    }
+
+                },
+
+
+                scales: {
+
+                    x: {
+
+                        grid: {
+
+                            display: false
+
+                        },
+
+
+                        ticks: {
+
+                            font: {
+
+                                size: 14,
+
+                                weight: "bold"
+
+                            }
+
+                        }
+
+                    },
+
+
+                    y: {
+
+                        beginAtZero: true,
+
+
+                        ticks: {
+
+                            precision: 0,
+
+                            font: {
+
+                                size: 12
+
+                            }
+
+                        },
+
+
+                        title: {
+
+                            display: true,
+
+                            text:
+                                "Number of Reviews",
+
+                            font: {
+
+                                size: 13,
+
+                                weight: "bold"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/* 
+   DOUGHNUT CHART
+ */
+
+const doughnutCanvas =
+    document.getElementById("doughnutChart");
+
+
+if (doughnutCanvas) {
+
+    new Chart(
+        doughnutCanvas,
+        {
+
+            type: "doughnut",
+
+
+            data: {
+
+                labels: [
+
+                    "Positive",
+                    "Negative",
+                    "Neutral"
+
+                ],
+
+
+                datasets: [
+
+                    {
+
+                        data: [
+
+                            positiveCount,
+                            negativeCount,
+                            neutralCount
+
+                        ],
+
+
+                        backgroundColor: [
+
+                            "#22c55e",
+                            "#ef4444",
+                            "#f59e0b"
+
+                        ],
+
+
+                        borderColor:
+                            "#ffffff",
+
+
+                        borderWidth: 5,
+
+
+                        hoverOffset: 10
+
+                    }
+
+                ]
+
+            },
+
+
+            options: {
+
+                responsive: true,
+
+
+                maintainAspectRatio: false,
+
+
+                cutout: "55%",
+
+
+                animation: {
+
+                    duration: 1000
+
+                },
+
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom",
+
+
+                        labels: {
+
+                            padding: 18,
+
+
+                            font: {
+
+                                size: 13,
+
+                                weight: "bold"
+
+                            }
+
+                        }
+
+                    },
+
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function(context) {
+
+                                    const value =
+                                        context.raw;
+
+
+                                    let percentage = 0;
+
+
+                                    if (
+                                        totalCount > 0
+                                    ) {
+
+                                        percentage =
+                                            (
+                                                value /
+                                                totalCount
+                                            ) * 100;
+
+                                    }
+
+
+                                    return (
+
+                                        context.label +
+                                        ": " +
+                                        value +
+                                        " (" +
+                                        percentage.toFixed(1) +
+                                        "%)"
+
+                                    );
+
+                                }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+</script>
+
+
+</body>
+
+</html>
